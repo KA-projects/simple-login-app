@@ -1,8 +1,14 @@
-import express from "express";
+import express, {
+  ErrorRequestHandler,
+  NextFunction,
+  Request,
+  Response,
+} from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import router from "./routes/userRoute.js";
+import router from "./router/authRouter.ts";
 import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
 
 import { config } from "dotenv";
 
@@ -10,17 +16,36 @@ const app = express();
 
 config();
 
-app.use(bodyParser.json({ limit: "30mb", extended: true }));
+app.use(bodyParser.json({ limit: "30mb" }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
-app.use(cors());
+app.use(
+  cors({
+    credentials: true,
+    origin: "http://localhost:5173",
+  })
+);
+app.use(cookieParser());
 
-app.use("/login", router);
+app.use("/auth", router);
+
+app.use(
+  (
+    err: ErrorRequestHandler,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    console.log(err);
+
+    res.send(400);
+  }
+);
 
 const port = 5000;
 
 const runServer = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URL, {
+    await mongoose.connect(process.env.MONGODB_URL!, {
       dbName: "ant-form",
     });
 

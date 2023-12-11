@@ -1,37 +1,44 @@
-import { UserType } from "../types/user";
+import axios from "axios";
+import { AuthResponse } from "../types";
 
-const url = "http://localhost:5000/login";
+export const API_URL = `http://localhost:5000/auth`;
 
-export const createUser = async (user: UserType) => {
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(user),
-    });
+const $api = axios.create({
+  withCredentials: true,
+  baseURL: API_URL,
+});
 
-    if (res.ok) {
-      const data = await res.json();
-      return data;
+$api.interceptors.request.use((config) => {
+  config.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
+  return config;
+});
+
+$api.interceptors.response.use(
+  (config) => {
+    return config;
+  },
+  async (error) => {
+    console.log("$api.interceptors: ", error);
+
+    const originalRequest = error.config;
+    if (
+      error.response.status == 401 &&
+      error.config &&
+      !error.config._isRetry
+    ) {
+      originalRequest._isRetry = true;
+      try {
+        const response = await axios.get<AuthResponse>(`${API_URL}/refresh`, {
+          withCredentials: true,
+        });
+        localStorage.setItem("token", response.data.accessToken);
+        return $api.request(originalRequest);
+      } catch (e) {
+        console.log("НЕ АВТОРИЗОВАН");
+      }
     }
-  } catch (error) {
-    console.error(error.message);
+    throw error;
   }
-};
+);
 
-export const getUser = async (username: string) => {
-  try {
-    const res = await fetch(`${url}/${username}`);
-
-    if (res.ok) {
-      const data = await res.json();
-
-      return data as UserType;
-    }
-  } catch (error) {
-    console.log(error.message);
-  }
-};
+export default $api;

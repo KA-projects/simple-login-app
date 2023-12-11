@@ -1,9 +1,13 @@
-import React from "react";
-import { Button, Form, Input } from "antd";
-import { createUser } from "../api";
+import { Button, Form, Input, message } from "antd";
 
 import { useNavigate } from "react-router-dom";
-import { UserType } from "../types/user";
+import { RegisterUserType } from "../types";
+import { useMutation } from "@tanstack/react-query";
+import AuthService from "../api/services/AuthService";
+import { useCheckAuth } from "../utils/useCheckAuth";
+import { useAppDispatch } from "../redux/hooks";
+import { haveAuth } from "../redux/authSlice";
+import axios from "axios";
 
 const onFinishFailed = (errorInfo: unknown) => {
   console.log("Failed:", errorInfo);
@@ -17,22 +21,61 @@ type FieldType = {
 };
 
 const Register = () => {
+   useCheckAuth();
+
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const warning = (message: string) => {
+    messageApi.open({
+      type: "warning",
+      content: message,
+      duration: 6,
+    });
+  };
+
+  const mutation = useMutation({
+    mutationFn: ({ email, password, username }: RegisterUserType) =>
+      AuthService.register(email, password, username),
+  });
 
   const onFinish = async (values: Required<FieldType>) => {
     const { email, username, password } = values;
 
-    const res = (await createUser({ email, username, password })) as UserType;
+    mutation.mutate(
+      { email, username, password },
+      {
+        onSuccess: (response) => {
+          localStorage.setItem("token", response.data.accessToken);
+          dispatch(haveAuth());
+          navigate(`/user/${response.data.user.username}`);
+        },
+        onError: (error) => {
+          if (axios.isAxiosError(error)) {
+            const errorMessage = error.response?.data as string;
 
-    if (res.email) {
-      navigate(`/user/${res.username}`);
-    }
+            const startIndex = errorMessage.match(/Error:/)?.index;
+            const endIndex = errorMessage.match(/<br>/)?.index;
 
-    console.log("Success:", values);
+            if (startIndex && endIndex) {
+              const filteredMsg = errorMessage
+                .slice(startIndex + 6, endIndex)
+                .trim();
+
+              warning(filteredMsg);
+            }
+          }
+        },
+      }
+    );
   };
 
   return (
     <>
+     
+      {contextHolder}
       <div className="title">Регистрация</div>
       <div className="login-container">
         <Form
