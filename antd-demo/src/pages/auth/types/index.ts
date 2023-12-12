@@ -21,3 +21,9 @@ export type BackendError = {
   message: string;
   errors: [];
 };
+
+export type FieldType = {
+  email?: string;
+  password?: string;
+  username?: string;
+};

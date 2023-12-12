@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { AuthResponse } from "../types";
-import { API_URL } from "../api";
+import { API_URL } from "../utils";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { useAppDispatch } from "../redux/hooks";
-import { haveAuth } from "../redux/authSlice";
+import { useAppDispatch } from "../../../app/redux/hooks";
+import { haveAuth } from "../../../app/redux/authSlice";
 import { message } from "antd";
 
 export const useCheckAuth = () => {
@@ -14,7 +14,6 @@ export const useCheckAuth = () => {
   const navigate = useNavigate();
 
   const [messageApi, contextHolder] = message.useMessage();
-
 
   const warning = (message: string) => {
     messageApi.open({
@@ -62,5 +61,5 @@ export const useCheckAuth = () => {
     }
   }, []);
 
-  return {context:contextHolder};
+  return { context: contextHolder };
 };

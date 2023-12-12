@@ -1,10 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
-import Root from "../components/Root";
-import Register from "../components/Register";
-import Login from "../components/Login";
-import User from "../components/User";
+import Root from "./Root";
 
-import { loader as UserLoader } from "../components/User";
+import { loader as UserLoader } from "../../entities/user/ui/User";
+import { Login, Register } from "../../pages/auth";
+import { UserPage } from "../../pages/user";
 
 export const router = createBrowserRouter([
   {
@@ -21,7 +20,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "/user/:username",
-        element: <User />,
+        element: <UserPage />,
         loader: UserLoader,
       },
     ],

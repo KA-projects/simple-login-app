@@ -1,5 +1,5 @@
-import $api from "..";
-import { AuthResponse } from "../../types";
+import $api from "../../../pages/auth/utils";
+import { AuthResponse } from "../../../pages/auth/types";
 
 import { AxiosResponse } from "axios";
 

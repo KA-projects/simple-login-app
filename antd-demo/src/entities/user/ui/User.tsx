@@ -2,35 +2,33 @@ import { useState, useEffect } from "react";
 import { LoaderFunction } from "react-router";
 
 import { useLoaderData } from "react-router-dom";
-import { BackendError, RegisterUserType, UserType } from "../types";
-import { useMutation } from "@tanstack/react-query";
 
-import UserService from "../api/services/UserService";
+import { useMutation } from "@tanstack/react-query";
 
 import { message } from "antd";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { haveAuth } from "../redux/authSlice";
+
+import { haveAuth } from "../../../app/redux/authSlice";
+import {
+  BackendError,
+  RegisterUserType,
+  UserType,
+} from "../../../pages/auth/types";
+import UserService from "../api/UserService";
+import { warning } from "../../../features/message/warning";
 
 export const loader: LoaderFunction<string> = async ({ params }) => {
   return await params.username;
 };
 
-const User = () => {
+export const User = () => {
   const [userInfo, setUserInfo] = useState<UserType | undefined>(undefined);
   const username = useLoaderData() as string;
 
   const dispatch = useDispatch();
 
   const [messageApi, contextHolder] = message.useMessage();
-
-  const warning = (message: string) => {
-    messageApi.open({
-      type: "warning",
-      content: message,
-      duration: 6,
-    });
-  };
 
   const mutation = useMutation({
     mutationFn: ({ username }: Pick<RegisterUserType, "username">) => {
@@ -52,7 +50,7 @@ const User = () => {
           if (axios.isAxiosError(error)) {
             const errorMessage = error.response?.data as BackendError;
 
-            warning(errorMessage.message);
+            warning(errorMessage.message, messageApi);
           }
         },
       }
@@ -80,5 +78,3 @@ const User = () => {
     </div>
   );
 };
-
-export default User;
