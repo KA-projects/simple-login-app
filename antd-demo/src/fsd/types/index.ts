@@ -6,7 +6,7 @@ export type RegisterUserType = {
 
 export type AuthResponse = {
   accessToken: string;
- 
+
   user: UserType;
 };
 
@@ -15,4 +15,9 @@ export type UserType = {
 
   id: string;
   username: string;
+};
+
+export type BackendError = {
+  message: string;
+  errors: [];
 };

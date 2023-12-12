@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { LoaderFunction } from "react-router";
 
 import { useLoaderData } from "react-router-dom";
-import { RegisterUserType, UserType } from "../types";
+import { BackendError, RegisterUserType, UserType } from "../types";
 import { useMutation } from "@tanstack/react-query";
 
 import UserService from "../api/services/UserService";
@@ -50,18 +50,9 @@ const User = () => {
           console.log("error: ", error);
 
           if (axios.isAxiosError(error)) {
-            const errorMessage = error.response?.data as string;
+            const errorMessage = error.response?.data as BackendError;
 
-            const startIndex = errorMessage.match(/Error:/)?.index;
-            const endIndex = errorMessage.match(/<br>/)?.index;
-
-            if (startIndex && endIndex) {
-              const filteredMsg = errorMessage
-                .slice(startIndex + 6, endIndex)
-                .trim();
-
-              warning(filteredMsg);
-            }
+            warning(errorMessage.message);
           }
         },
       }

@@ -1,7 +1,7 @@
 import { Button, Form, Input, message } from "antd";
 
 import { useNavigate } from "react-router-dom";
-import { RegisterUserType } from "../types";
+import { BackendError, RegisterUserType } from "../types";
 import { useMutation } from "@tanstack/react-query";
 import AuthService from "../api/services/AuthService";
 import { useCheckAuth } from "../utils/useCheckAuth";
@@ -21,7 +21,7 @@ type FieldType = {
 };
 
 const Register = () => {
-   useCheckAuth();
+  useCheckAuth();
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -54,18 +54,9 @@ const Register = () => {
         },
         onError: (error) => {
           if (axios.isAxiosError(error)) {
-            const errorMessage = error.response?.data as string;
+            const errorMessage = error.response?.data as BackendError;
 
-            const startIndex = errorMessage.match(/Error:/)?.index;
-            const endIndex = errorMessage.match(/<br>/)?.index;
-
-            if (startIndex && endIndex) {
-              const filteredMsg = errorMessage
-                .slice(startIndex + 6, endIndex)
-                .trim();
-
-              warning(filteredMsg);
-            }
+            warning(errorMessage.message);
           }
         },
       }
@@ -74,7 +65,6 @@ const Register = () => {
 
   return (
     <>
-     
       {contextHolder}
       <div className="title">Регистрация</div>
       <div className="login-container">

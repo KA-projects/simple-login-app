@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 
 import { config } from "dotenv";
+import { errorMiddleware } from "./middleware/error-middleware.ts";
 
 const app = express();
 
@@ -28,18 +29,12 @@ app.use(cookieParser());
 
 app.use("/auth", router);
 
-app.use(
-  (
-    err: ErrorRequestHandler,
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-    console.log(err);
+app.use(errorMiddleware);
 
-    res.send(400);
-  }
-);
+// Проверка емайл
+// Пароль мин 8 макс 25
+// Хотя бы один апперкейс пароль
+// class-validator
 
 const port = 5000;
 

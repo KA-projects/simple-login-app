@@ -4,6 +4,10 @@ import { NextFunction, Request, Response } from "express";
 import userService from "../service/user-service.ts";
 
 import UserDataDto from "../dtos/user-data.ts";
+import ApiError from "../exceptions/api-error.ts";
+
+import { Length, isEmail, isUppercase } from "class-validator";
+import { validation } from "../validation/index.ts";
 
 interface RequestWithBody extends Request {
   body: {
@@ -17,7 +21,10 @@ class AuthController {
   async register(req: RequestWithBody, res: Response, next: NextFunction) {
     try {
       const { email, password, username } = req.body;
-      const userData = await userService.register(email!, password, username);
+
+      validation(email, password);
+
+      const userData = await userService.register(email, password, username);
       res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
@@ -33,6 +40,9 @@ class AuthController {
   async login(req: RequestWithBody, res: Response, next: NextFunction) {
     try {
       const { email, password } = req.body;
+
+      validation(email);
+
       const userData = await userService.login(email, password);
       res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,

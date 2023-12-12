@@ -2,7 +2,7 @@ import React from "react";
 import { Button, Form, Input, message } from "antd";
 
 import { useNavigate } from "react-router-dom";
-import { RegisterUserType } from "../types";
+import { BackendError, RegisterUserType } from "../types";
 import AuthService from "../api/services/AuthService";
 import { useMutation } from "@tanstack/react-query";
 import { useCheckAuth } from "../utils/useCheckAuth";
@@ -53,21 +53,12 @@ const Login = () => {
         },
         onError: (error) => {
           if (axios.isAxiosError(error)) {
-            console.log(error);
+            
 
-            const errorMessage = error.response?.data as string;
-            const startIndex = errorMessage.match(/Error:/)?.index;
-            const endIndex = errorMessage.match(/<br>/)?.index;
-           
+            const errorMessage = error.response?.data as BackendError;
+         
 
-            if (startIndex && endIndex) {
-              const filteredMsg = errorMessage
-                .slice(startIndex + 6, endIndex)
-                .trim();
-              
-
-              warning(filteredMsg);
-            }
+            warning(errorMessage.message);
           }
         },
       }
